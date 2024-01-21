@@ -1,22 +1,24 @@
-FROM python:3.7-alpine
-LABEL MAINTAINER="Manimaran Paneerselvam"
+FROM python:3.9-alpine3.13
+LABEL MAINTAINER="Manimaran Panneerselvam"
 
-
+# Recommended to prevent buffering of console output
 ENV PYTHONUNBUFFERED 1
 
-COPY ./requirements.txt /requirements.txt
-RUN apk add --update --no-cache postgresql-client
-
-RUN apk add --update --no-cache --virtual .tmp-build-deps \
-        gcc libc-dev linux-headers postgresql-dev
-
-RUN pip install -r requirements.txt
-
-RUN apk del .tmp-build-deps
-
-RUN mkdir /app
-WORKDIR /app
+COPY ./requirements.txt /tmp/requirements.txt
 COPY ./app /app
+WORKDIR /app
 
-RUN adduser -D user
-USER user
+EXPOSE 8000
+
+RUN python -m venv /py && \
+        /py/bin/pip install -U pip && \
+        /py/bin/pip install -r /tmp/requirements.txt && \
+        rm -rf /tmp && \
+        adduser \
+                --disabled-password \
+                --no-create-home \
+                django-user
+
+ENV PATH = "/py/bin:$PATH"
+
+USER django-user
