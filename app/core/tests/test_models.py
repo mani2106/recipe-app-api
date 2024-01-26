@@ -36,3 +36,20 @@ class ModelTests(TestCase):
         for em, exp in sample_emails:
             user = get_user_model().objects.create_user(em, 'sample123')
             self.assertEqual(user.email, exp)
+
+    def test_if_empty_email_raises_error_onreg(self):
+        """Test if empty email on registration raises error"""
+
+        with self.assertRaises(ValueError):
+            get_user_model().objects.create_user('', 'passwd')
+
+    def test_create_super_user(self):
+        """Test creating super user"""
+
+        user = get_user_model().objects.create_superuser(
+            'test1@example.com',
+            'passwd'
+        )
+
+        self.assertTrue(user.is_superuser)
+        self.assertTrue(user.is_staff)
