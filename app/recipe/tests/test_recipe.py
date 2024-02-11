@@ -27,7 +27,7 @@ def create_recipe(user, **params):
 
     defaults = dict(
         title='Sample title',
-        time_min=21,
+        time_minutes=21,
         price=Decimal('23.4'),
         desc='Sample description',
         link='http://test-recipe.com'
@@ -67,8 +67,8 @@ class PrivateRecipeAPITests(TestCase):
     def test_retrieve_recipes(self):
         """Test retrieving a list of recipes"""
 
-        create_recipe(self.user)
-        create_recipe(self.user)
+        create_recipe(user=self.user)
+        create_recipe(user=self.user)
 
         res = self.client.get(RECIPES_URL)
 
@@ -109,20 +109,15 @@ class PrivateRecipeAPITests(TestCase):
 
     def test_create_recipe(self):
         """Test creating a recipe via api"""
-        # payload = dict(
-            # title='Sample recipe',
-            # time_min=20,
-            # price=Decimal('2.55'),
-            # desc='Sample Recipe to test',
-            # link='link'
-        # )
-        payload = {
-            'title': 'Sample recipe',
-            'time_minutes': 30,
-            'price': Decimal('5.99'),
-        }
-        # print(payload)
-        res = self.client.post(path=RECIPES_URL, data=payload)
+        payload = dict(
+            title='Sample recipe',
+            time_minutes=20,
+            price=Decimal('2.55'),
+            desc='Sample Recipe to test',
+            link='link'
+        )
+
+        res = self.client.post(RECIPES_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         rec = Recipe.objects.get(id=res.data['id'])
