@@ -9,6 +9,20 @@ from django.contrib.auth import get_user_model
 from core import models
 
 
+def create_user(email='user@example.com', password='test123', is_super=False):
+    """Utility to create user in db"""
+    if not is_super:
+        return get_user_model().objects.create_user(
+            email=email,
+            password=password
+        )
+    else:
+        return get_user_model().objects.create_superuser(
+            email=email,
+            password=password
+        )
+
+
 class ModelTests(TestCase):
     """Test db models"""
 
@@ -17,7 +31,7 @@ class ModelTests(TestCase):
         email = "test@example.com"
         pwd = "passwd@123"
 
-        user = get_user_model().objects.create_user(
+        user = create_user(
             email=email,
             password=pwd
         )
@@ -37,21 +51,22 @@ class ModelTests(TestCase):
         ]
 
         for em, exp in sample_emails:
-            user = get_user_model().objects.create_user(em, 'sample123')
+            user = create_user(em, 'sample123')
             self.assertEqual(user.email, exp)
 
     def test_if_empty_email_raises_error_onreg(self):
         """Test if empty email on registration raises error"""
 
         with self.assertRaises(ValueError):
-            get_user_model().objects.create_user('', 'passwd')
+            create_user('', 'passwd')
 
     def test_create_super_user(self):
         """Test creating super user"""
 
-        user = get_user_model().objects.create_superuser(
+        user = create_user(
             'test1@example.com',
-            'passwd'
+            'passwd',
+            is_super=True
         )
 
         self.assertTrue(user.is_superuser)
@@ -63,7 +78,7 @@ class ModelTests(TestCase):
         email = 'test@example.com'
         pwd = 'passwd@123'
 
-        user = get_user_model().objects.create_user(
+        user = create_user(
             email=email,
             password=pwd
         )
@@ -77,3 +92,10 @@ class ModelTests(TestCase):
         )
 
         self.assertEqual(str(recipe), recipe.title)
+
+    def test_create_tags(self):
+        """Test if a tag can be created"""
+        user = create_user()
+        tag = models.Tag.objects.create(user=user, name='Tag1')
+
+        self.assertEqual(str(tag), tag.name)
