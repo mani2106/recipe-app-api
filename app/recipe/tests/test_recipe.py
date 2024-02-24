@@ -237,6 +237,7 @@ class PrivateRecipeAPITests(TestCase):
             self.assertTrue(exists)
 
     def test_create_recipe_with_tags_existing(self):
+        """Test if we can create recipe with existing tags"""
         tag_ind = Tag.objects.create(user=self.user, name='Indian')
         payload = dict(
             title='Pongal',
@@ -260,3 +261,48 @@ class PrivateRecipeAPITests(TestCase):
                 user=self.user
             ).exists()
             self.assertTrue(exists)
+
+    def test_update_recipe_tags(self):
+        """Test if we can update existing recipe with new tags"""
+
+        recipe = create_recipe(user=self.user)
+
+        payload = dict(tags=[dict(name='Lunch')])
+        url = detail_url(recipe_id=recipe.id)
+
+        res = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        new_tag = Tag.objects.get(user=self.user, name='Lunch')
+        self.assertIn(new_tag, recipe.tags.all())
+
+    def test_update_recipe_ex_tags(self):
+        """Test if we can update existing recipe with existing tags"""
+        tag_bf = Tag.objects.create(user=self.user, name='Brkfast')
+        recipe = create_recipe(user=self.user)
+        # add tag via db call
+        recipe.tags.add(tag_bf)
+
+        tag_lun = Tag.objects.create(user=self.user, name='Lunch')
+
+        payload = dict(tags=[dict(name='Lunch')])
+        url = detail_url(recipe_id=recipe.id)
+        # add tag via recipe api call
+        res = self.client.patch(url, payload, format='json')
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn(tag_lun, recipe.tags.all())
+        self.assertNotIn(tag_bf, recipe.tags.all())
+
+    def test_clearing_recipe_tags(self):
+        """Test updating recipe to delete all tags"""
+        tag_bf = Tag.objects.create(user=self.user, name='Brkfast')
+        recipe = create_recipe(user=self.user)
+        # add tag via db call
+        recipe.tags.add(tag_bf)
+
+        payload = dict(tags=[])
+        url = detail_url(recipe_id=recipe.id)
+        # add tag via recipe api call
+        res = self.client.patch(url, payload, format='json')
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertNotIn(tag_bf, recipe.tags.all())
