@@ -29,19 +29,19 @@ class RecipeSerializer(serializers.ModelSerializer):
     """Serializer for Recipes"""
 
     tags = TagSerializer(many=True, required=False)
-    ingrs = IngredientSerializer(many=True, required=False)
+    ingredients = IngredientSerializer(many=True, required=False)
 
     class Meta:
         model = Recipe
         fields = ['id', 'title', 'time_minutes', 'price',
-                  'link', 'tags', 'ingrs']
+                  'link', 'tags', 'ingredients']
         read_only_fields = ['id']
 
     def _get_or_create_obj(self, objs, recipe, obj_name='Tag'):
         """Handles getting or creating tags as needed"""
         auth_user = self.context['request'].user
         model = Tag if obj_name == 'Tag' else Ingredient
-        attrib = 'tags' if obj_name == 'Tag' else 'ingrs'
+        attrib = 'tags' if obj_name == 'Tag' else 'ingredients'
         for obj in objs:
             db_obj, _ = model.objects.get_or_create(
                 user=auth_user,
@@ -54,7 +54,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """Create a recipe"""
         tags = validated_data.pop('tags', [])
-        ingrs = validated_data.pop('ingrs', [])
+        ingrs = validated_data.pop('ingredients', [])
         recipe = Recipe.objects.create(**validated_data)
         self._get_or_create_obj(recipe=recipe, objs=tags)
         self._get_or_create_obj(recipe=recipe, objs=ingrs,
@@ -64,7 +64,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         """Update recipe"""
         tags = validated_data.pop('tags', None)
-        ingrs = validated_data.pop('ingrs', None)
+        ingrs = validated_data.pop('ingredients', None)
 
         if tags is not None:
             instance.tags.clear()
