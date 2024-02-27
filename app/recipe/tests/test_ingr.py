@@ -96,9 +96,9 @@ class PrivateIngrApiTest(TestCase):
     def test_delete_ingredients(self):
         """Test if ingredients are removeable"""
 
-        # create tag to remove
+        # create ingredient to remove
         ingr1 = Ingredient.objects.create(user=self.user, name='Mint')
-        # test if tag was created
+        # test if ingredient was created
         ingrs = Ingredient.objects.filter(user=self.user)
         self.assertTrue(ingrs.exists())
 
@@ -108,5 +108,6 @@ class PrivateIngrApiTest(TestCase):
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
 
         ingrs = Ingredient.objects.filter(user=self.user)
-        # test if the tags list is empty and tag does not exist after delete
+        # test if the ingredients list is empty
+        # and ingredient does not exist after delete
         self.assertFalse(ingrs.exists())
