@@ -39,34 +39,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-# mixins should be inherited before viewsets
-class TagViewSet(mixins.UpdateModelMixin,
+class BaseRecipeAttrViewSet(
+                 mixins.UpdateModelMixin,
                  mixins.ListModelMixin,
                  mixins.DestroyModelMixin,
                  viewsets.GenericViewSet):
-
-    """Manage tags in db"""
-    serializer_class = serializers.TagSerializer
-    queryset = Tag.objects.all()
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        """Retrieve tags of authorised user"""
-        return self.queryset.filter(
-            user=self.request.user
-        ).order_by('-name')
-
-
-# mixins should be inherited before viewsets
-class IngredientViewSet(mixins.UpdateModelMixin,
-                        mixins.ListModelMixin,
-                        mixins.DestroyModelMixin,
-                        viewsets.GenericViewSet):
-
-    """Manage Ingredients in db"""
-    serializer_class = serializers.IngredientSerializer
-    queryset = Ingredient.objects.all()
+    """Basic view set for recipe attributes"""
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -75,3 +53,19 @@ class IngredientViewSet(mixins.UpdateModelMixin,
         return self.queryset.filter(
             user=self.request.user
         ).order_by('-name')
+
+
+# mixins should be inherited before viewsets
+class TagViewSet(BaseRecipeAttrViewSet):
+
+    """Manage tags in db"""
+    serializer_class = serializers.TagSerializer
+    queryset = Tag.objects.all()
+
+
+# mixins should be inherited before viewsets
+class IngredientViewSet(BaseRecipeAttrViewSet):
+
+    """Manage Ingredients in db"""
+    serializer_class = serializers.IngredientSerializer
+    queryset = Ingredient.objects.all()
