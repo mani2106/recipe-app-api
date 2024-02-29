@@ -371,3 +371,34 @@ class PrivateRecipeAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         ingr = Ingredient.objects.get(user=self.user, name='Lunch')
         self.assertIn(ingr, recipe.ingredients.all())
+
+    def test_update_recipe_ex_ingrs(self):
+        """Test if we can update existing recipe with existing Ingredients"""
+        ingr_lmn = Ingredient.objects.create(user=self.user, name='Lemon')
+        recipe = create_recipe(user=self.user)
+        # add ingr via db call
+        recipe.ingredients.add(ingr_lmn)
+
+        ingr_chil = Ingredient.objects.create(user=self.user, name='chilli')
+
+        payload = dict(ingredients=[dict(name='chilli')])
+        url = detail_url(recipe_id=recipe.id)
+        # add ingr via recipe api call
+        res = self.client.patch(url, payload, format='json')
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn(ingr_chil, recipe.ingredients.all())
+        self.assertNotIn(ingr_lmn, recipe.ingredients.all())
+
+    def test_clearing_recipe_ingrs(self):
+        """Test updating recipe to delete all ingredients"""
+        ingr_lmn = Ingredient.objects.create(user=self.user, name='Lemon')
+        recipe = create_recipe(user=self.user)
+        # add tag via db call
+        recipe.ingredients.add(ingr_lmn)
+
+        payload = dict(ingredients=[])
+        url = detail_url(recipe_id=recipe.id)
+        # add tag via recipe api call
+        res = self.client.patch(url, payload, format='json')
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertNotIn(ingr_lmn, recipe.ingredients.all())
