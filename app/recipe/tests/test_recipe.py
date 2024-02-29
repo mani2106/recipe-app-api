@@ -325,9 +325,9 @@ class PrivateRecipeAPITests(TestCase):
         recipe = recipes[0]
         self.assertEqual(recipe.ingredients.count(), 2)
 
-        for tag in payload['ingredients']:
+        for ingr in payload['ingredients']:
             exists = recipe.ingredients.filter(
-                name=tag['name'],
+                name=ingr['name'],
                 user=self.user
             ).exists()
             self.assertTrue(exists)
@@ -351,9 +351,9 @@ class PrivateRecipeAPITests(TestCase):
 
         self.assertIn(ingr, recipe.ingredients.all())
 
-        for tag in payload['ingredients']:
+        for ingr in payload['ingredients']:
             exists = recipe.ingredients.filter(
-                name=tag['name'],
+                name=ingr['name'],
                 user=self.user
             ).exists()
             self.assertTrue(exists)
